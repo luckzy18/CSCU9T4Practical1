@@ -17,6 +17,7 @@ public class TrainingRecordGUI extends JFrame implements ActionListener {
     private JTextField mins = new JTextField(2);
     private JTextField secs = new JTextField(2);
     private JTextField dist = new JTextField(4);
+    private JTextField sport=new JTextField(5);
     private JLabel labn = new JLabel(" Name:");
     private JLabel labd = new JLabel(" Day:");
     private JLabel labm = new JLabel(" Month:");
@@ -24,9 +25,15 @@ public class TrainingRecordGUI extends JFrame implements ActionListener {
     private JLabel labh = new JLabel(" Hours:");
     private JLabel labmm = new JLabel(" Mins:");
     private JLabel labs = new JLabel(" Secs:");
+    private JLabel labSport=new JLabel("Stroke:");
     private JLabel labdist = new JLabel(" Distance (km):");
     private JButton addR = new JButton("Add");
+    private JButton remove=new JButton("Remove");
     private JButton lookUpByDate = new JButton("Look Up");
+    private JButton findAllByDate = new JButton("find all");
+    private JPanel sportInfo=new JPanel();
+    String[] ar={"Swimming","Running","Cycling"};
+    private JComboBox sportSelection=new JComboBox(ar);
 
     private TrainingRecord myAthletes = new TrainingRecord();
 
@@ -67,12 +74,23 @@ public class TrainingRecordGUI extends JFrame implements ActionListener {
         add(addR);
         addR.addActionListener(this);
         add(lookUpByDate);
+        findAllByDate.addActionListener(this);
+        add(findAllByDate);
+        remove.addActionListener(this);
+        add(remove);
+        sportSelection.addActionListener(this);
+        add(sportSelection);
+        sportInfo.add(labSport);
+        sportInfo.add(sport);
+        add(sportInfo);
+
         lookUpByDate.addActionListener(this);
         add(outputArea);
         outputArea.setEditable(false);
         setSize(720, 200);
         setVisible(true);
         blankDisplay();
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         // To save typing in new entries while testing, uncomment
         // the following lines (or add your own test cases)
@@ -88,13 +106,44 @@ public class TrainingRecordGUI extends JFrame implements ActionListener {
         if (event.getSource() == lookUpByDate) {
             message = lookupEntry();
         }
+        if (event.getSource() == findAllByDate){
+            message= findAllByDate();
+        }
+        if (event.getSource() == sportSelection){
+           display(sportSelection.getSelectedItem());
+           return;
+        }
+        if (event.getSource() == remove){
+
+            message= remove();
+        }
         outputArea.setText(message);
         blankDisplay();
     } // actionPerformed
 
+    public String remove(){
+        int m = Integer.parseInt(month.getText());
+        int d = Integer.parseInt(day.getText());
+        int y = Integer.parseInt(year.getText());
+        String n = name.getText();
+        outputArea.setText("looking up record ...");
+        String message=myAthletes.delete(n,d,m,y);
+        return message;
+    }
+
+    public void display(Object sport){
+        String selectedSport= (String) sport;
+        if(sport.equals("Swimming")){
+            labSport.setText("Stroke");
+        }else if(sport.equals("Cycling")){
+            labSport.setText("incline");
+        }else if(sport.equals("Running")){
+            labSport.setText("incline");
+        }
+    }
     public String addEntry(String what) {
-        String message = "Record added\n";
-        System.out.println("Adding "+what+" entry to the records");
+        String message;
+        System.out.println("Trying to add "+what+" entry to the records");
         String n = name.getText();
         int m = Integer.parseInt(month.getText());
         int d = Integer.parseInt(day.getText());
@@ -103,8 +152,19 @@ public class TrainingRecordGUI extends JFrame implements ActionListener {
         int h = Integer.parseInt(hours.getText());
         int mm = Integer.parseInt(mins.getText());
         int s = Integer.parseInt(secs.getText());
-        Entry e = new Entry(n, d, m, y, h, mm, s, km);
-        myAthletes.addEntry(e);
+        String selectedSport=(String) sportSelection.getSelectedItem();
+        Entry e=new Entry(n, d, m, y, h, mm, s, km);
+        if(selectedSport.equals("Swimming")){
+            String stroke=sport.getText();
+            e=new Swim(n, d, m, y, h, mm, s, km,stroke);
+        }else if(selectedSport.equals("Cycling")){
+            double incline=Double.parseDouble(sport.getText());
+            e=new Cycle(n, d, m, y, h, mm, s, km,incline);
+        }else if(selectedSport.equals("Cycling")){
+            double incline=Double.parseDouble(sport.getText());
+            e=new Run(n, d, m, y, h, mm, s, km,incline);
+        }
+        message=myAthletes.addEntry(e);
         return message;
     }
     
@@ -117,6 +177,14 @@ public class TrainingRecordGUI extends JFrame implements ActionListener {
         return message;
     }
 
+    public String findAllByDate(){
+        int m = Integer.parseInt(month.getText());
+        int d = Integer.parseInt(day.getText());
+        int y = Integer.parseInt(year.getText());
+        outputArea.setText("looking up records ...");
+        String message = myAthletes.findAllByDate(d, m, y);
+        return message;
+    }
     public void blankDisplay() {
         name.setText("");
         day.setText("");
@@ -126,7 +194,7 @@ public class TrainingRecordGUI extends JFrame implements ActionListener {
         mins.setText("");
         secs.setText("");
         dist.setText("");
-
+        sport.setText("");
     }// blankDisplay
     // Fills the input fields on the display for testing purposes only
     public void fillDisplay(Entry ent) {

@@ -3,7 +3,7 @@ The starter code for Java Practical exercise number 1 in CSCU9T4
 This is a Netbeans project but you can import it to an IDE of your choice.  
 Instructions on doing so can be found by simply searching for:
 ```
-[insert IDE name here] import Netbeans project
+INTELIJ import Netbeans project
 ```
 I have successfully imported to:
 - Eclipse
